@@ -18,7 +18,7 @@ A property listing app where you can post places for rent or sale, browse and fi
 
 ## Getting started
 
-You'll need Node 18+ and a MongoDB connection (either local, or a free MongoDB Atlas cluster).
+Node 18+ and a MongoDB connection needed
 
 ### 1. Backend
 
@@ -37,7 +37,7 @@ JWT_SECRET=any long random string
 JWT_EXPIRES_IN=7d
 ```
 
-For `JWT_SECRET` you can generate one with:
+Generate `JWT_SECRET` with:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -49,7 +49,7 @@ Then start it:
 npm run dev
 ```
 
-If it connects you'll see the server start and MongoDB connect on port 5000.
+
 
 ### 2. Frontend
 
@@ -61,7 +61,7 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints (usually http://localhost:5173). The frontend talks to the backend through a proxy, so you don't need to open the backend port yourself.
+Open the URL Vite prints 
 
 ## API routes
 
@@ -81,4 +81,4 @@ Open the URL Vite prints (usually http://localhost:5173). The frontend talks to 
 ## Notes
 
 - Only the user who created a listing can edit or delete it. The check happens on the server, so it can't be bypassed from the frontend.
-- The `.env` file holds secrets and isn't committed. Use `.env.example` as a reference for what to set.
+- Use `.env.example` as a reference for what to set.
