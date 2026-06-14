@@ -80,9 +80,9 @@ export default function ProfilePage() {
             <div className="profile-section">
               <div className="profile-avatar-block">
                 <div className="profile-avatar-lg">{initials}</div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Cinzel', serif", fontWeight: 600, fontSize: '1rem' }}>{user?.name || user?.username}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{user?.email}</div>
+                <div>
+                  <div className="profile-avatar-name">{user?.name || user?.username}</div>
+                  <div className="profile-avatar-email">{user?.email}</div>
                 </div>
               </div>
               <h3>Account Info</h3>
