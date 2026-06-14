@@ -11,9 +11,16 @@ const buildFilter = ({ city, minPrice, maxPrice }) => {
   return filter;
 };
 
+const buildSort = (sortBy) => {
+  if (sortBy === 'price_asc')  return { price: 1 };
+  if (sortBy === 'price_desc') return { price: -1 };
+  return { createdAt: -1 };
+};
+
 const getAllProperties = async (query) => {
   const filter = buildFilter(query);
-  return propertyRepo.findAll(filter);
+  const sort   = buildSort(query.sortBy);
+  return propertyRepo.findAll(filter, sort);
 };
 
 const getPropertyById = async (id) => {

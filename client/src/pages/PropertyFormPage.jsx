@@ -1,21 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createProperty, getPropertyById, updateProperty } from '../api/properties';
+import { uploadImages } from '../api/upload';
 import InputField from '../components/InputField';
 
 const TYPES = ['Apartment', 'House', 'Studio'];
 
 const emptyForm = {
   title: '', description: '', price: '',
-  city: '', country: '', type: 'Apartment', imageUrls: '',
+  city: '', country: '', type: 'Apartment',
 };
+
+const XIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+  </svg>
+);
+
+const UploadIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+  </svg>
+);
 
 export default function PropertyFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = Boolean(id);
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState(emptyForm);
+  const [imageUrls, setImageUrls] = useState([]);
+  const [uploadQueue, setUploadQueue] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,8 +48,8 @@ export default function PropertyFormPage() {
         setForm({
           title: p.title, description: p.description, price: String(p.price),
           city: p.city, country: p.country, type: p.type,
-          imageUrls: p.imageUrls.join(', '),
         });
+        setImageUrls(p.imageUrls || []);
       })
       .catch(() => setServerError('Could not load property data.'))
       .finally(() => setFetching(false));
@@ -51,6 +70,41 @@ export default function PropertyFormPage() {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const previews = files.map((f) => ({ file: f, preview: URL.createObjectURL(f) }));
+    setUploadQueue((prev) => [...prev, ...previews]);
+    e.target.value = '';
+  };
+
+  const removeQueued = (idx) => {
+    setUploadQueue((prev) => {
+      URL.revokeObjectURL(prev[idx].preview);
+      return prev.filter((_, i) => i !== idx);
+    });
+  };
+
+  const removeUploaded = (idx) => {
+    setImageUrls((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpload = async () => {
+    if (!uploadQueue.length) return;
+    setUploading(true);
+    setUploadError('');
+    try {
+      const res = await uploadImages(uploadQueue.map((q) => q.file));
+      setImageUrls((prev) => [...prev, ...res.data.urls]);
+      uploadQueue.forEach((q) => URL.revokeObjectURL(q.preview));
+      setUploadQueue([]);
+    } catch {
+      setUploadError('Upload failed. Check file size (max 5MB each) and try again.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const e2 = validate();
@@ -58,10 +112,7 @@ export default function PropertyFormPage() {
     setErrors({});
     setServerError('');
     setLoading(true);
-    const payload = {
-      ...form, price: Number(form.price),
-      imageUrls: form.imageUrls.split(',').map((u) => u.trim()).filter(Boolean),
-    };
+    const payload = { ...form, price: Number(form.price), imageUrls };
     try {
       if (isEdit) {
         await updateProperty(id, payload);
@@ -120,9 +171,70 @@ export default function PropertyFormPage() {
             {errors.type && <span className="error-text">{errors.type}</span>}
           </div>
 
-          <InputField label="Photo URLs (comma-separated)" id="imageUrls" name="imageUrls"
-            value={form.imageUrls} onChange={handleChange}
-            placeholder="https://…, https://…" />
+          {/* Image upload section */}
+          <div className="form-group">
+            <label>Photos</label>
+
+            {/* Already-uploaded images */}
+            {imageUrls.length > 0 && (
+              <div className="upload-preview-grid">
+                {imageUrls.map((url, i) => (
+                  <div key={i} className="upload-thumb">
+                    <img src={url} alt={`Photo ${i + 1}`} />
+                    <button type="button" className="upload-thumb-remove" onClick={() => removeUploaded(i)} aria-label="Remove photo">
+                      <XIcon />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Queued (not yet uploaded) */}
+            {uploadQueue.length > 0 && (
+              <div className="upload-preview-grid">
+                {uploadQueue.map((q, i) => (
+                  <div key={i} className="upload-thumb upload-thumb-queued">
+                    <img src={q.preview} alt={`Queued ${i + 1}`} />
+                    <button type="button" className="upload-thumb-remove" onClick={() => removeQueued(i)} aria-label="Remove queued photo">
+                      <XIcon />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Drop zone */}
+            <button
+              type="button"
+              className="upload-dropzone"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <UploadIcon />
+              <span>Click to select photos</span>
+              <small>JPEG, PNG, WebP — max 5MB each</small>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+
+            {uploadQueue.length > 0 && (
+              <button
+                type="button"
+                className="btn-secondary btn-block"
+                onClick={handleUpload}
+                disabled={uploading}
+                style={{ marginTop: '0.5rem' }}
+              >
+                {uploading ? 'Uploading…' : `Upload ${uploadQueue.length} photo${uploadQueue.length > 1 ? 's' : ''}`}
+              </button>
+            )}
+            {uploadError && <span className="error-text">{uploadError}</span>}
+          </div>
 
           <div style={{ marginTop: '0.5rem' }}>
             <button type="submit" className="btn-primary btn-block" disabled={loading}>

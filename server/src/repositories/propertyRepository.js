@@ -1,7 +1,7 @@
 const Property = require('../models/Property');
 
-const findAll = (filter = {}) =>
-  Property.find(filter).populate('owner', 'username name email').sort({ createdAt: -1 });
+const findAll = (filter = {}, sort = { createdAt: -1 }) =>
+  Property.find(filter).populate('owner', 'username name email').sort(sort);
 
 const findById = (id) =>
   Property.findById(id).populate('owner', 'username name email phone');

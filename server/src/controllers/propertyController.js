@@ -2,8 +2,8 @@ const propertyService = require('../services/propertyService');
 
 const getAllProperties = async (req, res, next) => {
   try {
-    const { city, minPrice, maxPrice } = req.query;
-    const properties = await propertyService.getAllProperties({ city, minPrice, maxPrice });
+    const { city, minPrice, maxPrice, sortBy } = req.query;
+    const properties = await propertyService.getAllProperties({ city, minPrice, maxPrice, sortBy });
     res.status(200).json({ properties });
   } catch (err) {
     next(err);

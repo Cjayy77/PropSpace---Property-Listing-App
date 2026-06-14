@@ -16,6 +16,7 @@ export default function HomePage() {
       if (filters.city) params.city = filters.city;
       if (filters.minPrice) params.minPrice = filters.minPrice;
       if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+      if (filters.sortBy) params.sortBy = filters.sortBy;
       const res = await getAllProperties(params);
       setProperties(res.data.properties);
     } catch {

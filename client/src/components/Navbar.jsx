@@ -21,6 +21,7 @@ export default function Navbar() {
         <Link to="/">Browse</Link>
         {user ? (
           <>
+            <Link to="/watchlist">Watchlist</Link>
             <Link to="/dashboard">My Listings</Link>
             <Link to="/properties/new">List Property</Link>
             <Link to="/profile" title={user.username} aria-label="Profile">
