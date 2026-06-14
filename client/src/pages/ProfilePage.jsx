@@ -6,10 +6,12 @@ import InputField from '../components/InputField';
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
 
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : user?.username?.[0]?.toUpperCase() ?? '?';
+
   const [profileForm, setProfileForm] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    avatarUrl: user?.avatarUrl || '',
+    name: user?.name || '', phone: user?.phone || '', avatarUrl: user?.avatarUrl || '',
   });
   const [profileMsg, setProfileMsg] = useState('');
   const [profileError, setProfileError] = useState('');
@@ -26,9 +28,7 @@ export default function ProfilePage() {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    setProfileMsg('');
-    setProfileError('');
-    setProfileLoading(true);
+    setProfileMsg(''); setProfileError(''); setProfileLoading(true);
     try {
       const res = await updateMe(profileForm);
       updateUser(res.data.user);
@@ -55,10 +55,7 @@ export default function ProfilePage() {
     e.preventDefault();
     const e2 = validatePw();
     if (Object.keys(e2).length) { setPwErrors(e2); return; }
-    setPwErrors({});
-    setPwMsg('');
-    setPwError('');
-    setPwLoading(true);
+    setPwErrors({}); setPwMsg(''); setPwError(''); setPwLoading(true);
     try {
       await changePassword(pwForm);
       setPwMsg('Password changed successfully.');
@@ -71,80 +68,83 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="profile-page">
-      <h2>My Profile</h2>
-      <div className="profile-grid">
-        <section className="profile-section">
-          <h3>Account Info</h3>
-          <p><strong>Username:</strong> {user?.username}</p>
-          <p><strong>Email:</strong> {user?.email}</p>
-        </section>
+    <div className="main-content">
+      <div className="profile-page">
+        <div className="profile-header">
+          <h2>My Profile</h2>
+          <p>Manage your account information and security settings.</p>
+        </div>
 
-        <section className="profile-section">
-          <h3>Edit Profile</h3>
-          {profileMsg && <p className="success-banner">{profileMsg}</p>}
-          {profileError && <p className="error-banner">{profileError}</p>}
-          <form onSubmit={handleProfileSubmit} noValidate>
-            <InputField
-              label="Display Name"
-              id="name"
-              name="name"
-              value={profileForm.name}
-              onChange={handleProfileChange}
-              placeholder="Your full name"
-            />
-            <InputField
-              label="Phone"
-              id="phone"
-              name="phone"
-              value={profileForm.phone}
-              onChange={handleProfileChange}
-              placeholder="+1 555 000 0000"
-            />
-            <InputField
-              label="Avatar URL"
-              id="avatarUrl"
-              name="avatarUrl"
-              value={profileForm.avatarUrl}
-              onChange={handleProfileChange}
-              placeholder="https://…"
-            />
-            <button type="submit" className="btn-primary" disabled={profileLoading}>
-              {profileLoading ? 'Saving…' : 'Save Changes'}
-            </button>
-          </form>
-        </section>
+        <div className="profile-grid">
+          <aside>
+            <div className="profile-section">
+              <div className="profile-avatar-block">
+                <div className="profile-avatar-lg">{initials}</div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: "'Cinzel', serif", fontWeight: 600, fontSize: '1rem' }}>{user?.name || user?.username}</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{user?.email}</div>
+                </div>
+              </div>
+              <h3>Account Info</h3>
+              <div className="profile-info-row">
+                <span className="profile-info-label">Username</span>
+                <span className="profile-info-value">@{user?.username}</span>
+              </div>
+              <div className="profile-info-row">
+                <span className="profile-info-label">Email</span>
+                <span className="profile-info-value" style={{ fontSize: '0.85rem' }}>{user?.email}</span>
+              </div>
+              {user?.phone && (
+                <div className="profile-info-row">
+                  <span className="profile-info-label">Phone</span>
+                  <span className="profile-info-value">{user.phone}</span>
+                </div>
+              )}
+            </div>
+          </aside>
 
-        <section className="profile-section">
-          <h3>Change Password</h3>
-          {pwMsg && <p className="success-banner">{pwMsg}</p>}
-          {pwError && <p className="error-banner">{pwError}</p>}
-          <form onSubmit={handlePwSubmit} noValidate>
-            <InputField
-              label="Current Password"
-              id="oldPassword"
-              name="oldPassword"
-              type="password"
-              value={pwForm.oldPassword}
-              onChange={handlePwChange}
-              error={pwErrors.oldPassword}
-              autoComplete="current-password"
-            />
-            <InputField
-              label="New Password"
-              id="newPassword"
-              name="newPassword"
-              type="password"
-              value={pwForm.newPassword}
-              onChange={handlePwChange}
-              error={pwErrors.newPassword}
-              autoComplete="new-password"
-            />
-            <button type="submit" className="btn-primary" disabled={pwLoading}>
-              {pwLoading ? 'Changing…' : 'Change Password'}
-            </button>
-          </form>
-        </section>
+          <div className="profile-tabs">
+            <div className="profile-section">
+              <h3>Edit Profile</h3>
+              {profileMsg && <p className="success-banner" role="status">{profileMsg}</p>}
+              {profileError && <p className="error-banner" role="alert">{profileError}</p>}
+              <form onSubmit={handleProfileSubmit} noValidate>
+                <InputField label="Display Name" id="name" name="name" value={profileForm.name}
+                  onChange={handleProfileChange} placeholder="Your full name" />
+                <InputField label="Phone" id="phone" name="phone" type="tel"
+                  value={profileForm.phone} onChange={handleProfileChange}
+                  placeholder="+1 555 000 0000" />
+                <InputField label="Avatar URL" id="avatarUrl" name="avatarUrl"
+                  value={profileForm.avatarUrl} onChange={handleProfileChange}
+                  placeholder="https://…" />
+                <button type="submit" className="btn-primary" disabled={profileLoading}
+                  style={{ marginTop: '0.25rem' }}>
+                  {profileLoading ? 'Saving…' : 'Save Changes'}
+                </button>
+              </form>
+            </div>
+
+            <div className="profile-section">
+              <h3>Change Password</h3>
+              {pwMsg && <p className="success-banner" role="status">{pwMsg}</p>}
+              {pwError && <p className="error-banner" role="alert">{pwError}</p>}
+              <form onSubmit={handlePwSubmit} noValidate>
+                <InputField label="Current Password" id="oldPassword" name="oldPassword"
+                  type="password" value={pwForm.oldPassword} onChange={handlePwChange}
+                  error={pwErrors.oldPassword} autoComplete="current-password"
+                  placeholder="••••••••" />
+                <InputField label="New Password" id="newPassword" name="newPassword"
+                  type="password" value={pwForm.newPassword} onChange={handlePwChange}
+                  error={pwErrors.newPassword} autoComplete="new-password"
+                  placeholder="Min. 6 characters" />
+                <button type="submit" className="btn-primary" disabled={pwLoading}
+                  style={{ marginTop: '0.25rem' }}>
+                  {pwLoading ? 'Updating…' : 'Update Password'}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

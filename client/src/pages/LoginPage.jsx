@@ -47,35 +47,24 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h2>Welcome back</h2>
-        {serverError && <p className="error-banner">{serverError}</p>}
+        <h2>Welcome Back</h2>
+        <p className="auth-subtitle">Sign in to your PropSpace account</p>
+        <div className="auth-divider" />
+        {serverError && <p className="error-banner" role="alert">{serverError}</p>}
         <form onSubmit={handleSubmit} noValidate>
-          <InputField
-            label="Email"
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            error={errors.email}
-            autoComplete="email"
-          />
-          <InputField
-            label="Password"
-            id="password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            error={errors.password}
-            autoComplete="current-password"
-          />
-          <button type="submit" className="btn-primary btn-block" disabled={loading}>
-            {loading ? 'Signing in…' : 'Login'}
+          <InputField label="Email address" id="email" name="email" type="email"
+            value={form.email} onChange={handleChange} error={errors.email}
+            autoComplete="email" placeholder="you@example.com" />
+          <InputField label="Password" id="password" name="password" type="password"
+            value={form.password} onChange={handleChange} error={errors.password}
+            autoComplete="current-password" placeholder="••••••••" />
+          <button type="submit" className="btn-primary btn-block" disabled={loading}
+            style={{ marginTop: '0.5rem' }}>
+            {loading ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
         <p className="auth-footer">
-          Don't have an account? <Link to="/register">Register</Link>
+          Don't have an account? <Link to="/register">Create one</Link>
         </p>
       </div>
     </div>

@@ -48,45 +48,27 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h2>Create an account</h2>
-        {serverError && <p className="error-banner">{serverError}</p>}
+        <h2>Create Account</h2>
+        <p className="auth-subtitle">Join PropSpace and start listing or browsing today</p>
+        <div className="auth-divider" />
+        {serverError && <p className="error-banner" role="alert">{serverError}</p>}
         <form onSubmit={handleSubmit} noValidate>
-          <InputField
-            label="Username"
-            id="username"
-            name="username"
-            type="text"
-            value={form.username}
-            onChange={handleChange}
-            error={errors.username}
-            autoComplete="username"
-          />
-          <InputField
-            label="Email"
-            id="email"
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            error={errors.email}
-            autoComplete="email"
-          />
-          <InputField
-            label="Password"
-            id="password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            error={errors.password}
-            autoComplete="new-password"
-          />
-          <button type="submit" className="btn-primary btn-block" disabled={loading}>
-            {loading ? 'Creating account…' : 'Register'}
+          <InputField label="Username" id="username" name="username" type="text"
+            value={form.username} onChange={handleChange} error={errors.username}
+            autoComplete="username" placeholder="e.g. johndoe" />
+          <InputField label="Email address" id="email" name="email" type="email"
+            value={form.email} onChange={handleChange} error={errors.email}
+            autoComplete="email" placeholder="you@example.com" />
+          <InputField label="Password" id="password" name="password" type="password"
+            value={form.password} onChange={handleChange} error={errors.password}
+            autoComplete="new-password" placeholder="Min. 6 characters" />
+          <button type="submit" className="btn-primary btn-block" disabled={loading}
+            style={{ marginTop: '0.5rem' }}>
+            {loading ? 'Creating account…' : 'Create Account'}
           </button>
         </form>
         <p className="auth-footer">
-          Already have an account? <Link to="/login">Login</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

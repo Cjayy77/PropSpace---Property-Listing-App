@@ -10,6 +10,10 @@ export default function Navbar() {
     navigate('/');
   };
 
+  const initials = user?.name
+    ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : user?.username?.[0]?.toUpperCase() ?? '?';
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">PropSpace</Link>
@@ -18,14 +22,16 @@ export default function Navbar() {
         {user ? (
           <>
             <Link to="/dashboard">My Listings</Link>
-            <Link to="/properties/new">+ List Property</Link>
-            <Link to="/profile">Profile</Link>
+            <Link to="/properties/new">List Property</Link>
+            <Link to="/profile" title={user.username} aria-label="Profile">
+              <div className="navbar-avatar">{initials}</div>
+            </Link>
             <button onClick={handleLogout} className="btn-link">Logout</button>
           </>
         ) : (
           <>
             <Link to="/login">Login</Link>
-            <Link to="/register" className="btn-primary-sm">Register</Link>
+            <Link to="/register" className="btn-primary-sm">Get Started</Link>
           </>
         )}
       </div>

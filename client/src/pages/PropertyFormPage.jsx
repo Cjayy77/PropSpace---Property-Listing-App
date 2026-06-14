@@ -6,13 +6,8 @@ import InputField from '../components/InputField';
 const TYPES = ['Apartment', 'House', 'Studio'];
 
 const emptyForm = {
-  title: '',
-  description: '',
-  price: '',
-  city: '',
-  country: '',
-  type: 'Apartment',
-  imageUrls: '',
+  title: '', description: '', price: '',
+  city: '', country: '', type: 'Apartment', imageUrls: '',
 };
 
 export default function PropertyFormPage() {
@@ -32,12 +27,8 @@ export default function PropertyFormPage() {
       .then((res) => {
         const p = res.data.property;
         setForm({
-          title: p.title,
-          description: p.description,
-          price: String(p.price),
-          city: p.city,
-          country: p.country,
-          type: p.type,
+          title: p.title, description: p.description, price: String(p.price),
+          city: p.city, country: p.country, type: p.type,
           imageUrls: p.imageUrls.join(', '),
         });
       })
@@ -67,16 +58,10 @@ export default function PropertyFormPage() {
     setErrors({});
     setServerError('');
     setLoading(true);
-
     const payload = {
-      ...form,
-      price: Number(form.price),
-      imageUrls: form.imageUrls
-        .split(',')
-        .map((u) => u.trim())
-        .filter(Boolean),
+      ...form, price: Number(form.price),
+      imageUrls: form.imageUrls.split(',').map((u) => u.trim()).filter(Boolean),
     };
-
     try {
       if (isEdit) {
         await updateProperty(id, payload);
@@ -92,91 +77,60 @@ export default function PropertyFormPage() {
     }
   };
 
-  if (fetching) return <p className="state-msg">Loading…</p>;
+  if (fetching) return <div className="main-content"><p className="state-msg">Loading…</p></div>;
 
   return (
-    <div className="form-page">
-      <h2>{isEdit ? 'Edit Property' : 'List a Property'}</h2>
-      {serverError && <p className="error-banner">{serverError}</p>}
-      <form onSubmit={handleSubmit} noValidate className="property-form">
-        <InputField
-          label="Title"
-          id="title"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          error={errors.title}
-          placeholder="e.g. Cozy 2BR Apartment"
-        />
-        <div className="form-group">
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className={`form-input${errors.description ? ' input-error' : ''}`}
-            rows={4}
-            placeholder="Describe the property…"
-          />
-          {errors.description && <span className="error-text">{errors.description}</span>}
-        </div>
-        <InputField
-          label="Price ($/mo)"
-          id="price"
-          name="price"
-          type="number"
-          min="0"
-          value={form.price}
-          onChange={handleChange}
-          error={errors.price}
-          placeholder="e.g. 1500"
-        />
-        <div className="form-row">
-          <InputField
-            label="City"
-            id="city"
-            name="city"
-            value={form.city}
-            onChange={handleChange}
-            error={errors.city}
-            placeholder="e.g. Paris"
-          />
-          <InputField
-            label="Country"
-            id="country"
-            name="country"
-            value={form.country}
-            onChange={handleChange}
-            error={errors.country}
-            placeholder="e.g. France"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="type">Property Type</label>
-          <select
-            id="type"
-            name="type"
-            value={form.type}
-            onChange={handleChange}
-            className={`form-input${errors.type ? ' input-error' : ''}`}
-          >
-            {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-          {errors.type && <span className="error-text">{errors.type}</span>}
-        </div>
-        <InputField
-          label="Image URLs (comma-separated)"
-          id="imageUrls"
-          name="imageUrls"
-          value={form.imageUrls}
-          onChange={handleChange}
-          placeholder="https://..., https://..."
-        />
-        <button type="submit" className="btn-primary btn-block" disabled={loading}>
-          {loading ? 'Saving…' : isEdit ? 'Update Property' : 'List Property'}
-        </button>
-      </form>
+    <div className="main-content">
+      <div className="form-page">
+        <h2>{isEdit ? 'Edit Listing' : 'List a Property'}</h2>
+        <p className="form-page-sub">
+          {isEdit ? 'Update your property details below.' : 'Fill in the details to publish your listing.'}
+        </p>
+        {serverError && <p className="error-banner" role="alert">{serverError}</p>}
+        <form onSubmit={handleSubmit} noValidate className="property-form">
+          <InputField label="Title" id="title" name="title" value={form.title}
+            onChange={handleChange} error={errors.title} placeholder="e.g. Bright 2BR in City Centre" />
+
+          <div className="form-group">
+            <label htmlFor="description">Description</label>
+            <textarea id="description" name="description" value={form.description}
+              onChange={handleChange} rows={4}
+              className={`form-input${errors.description ? ' input-error' : ''}`}
+              placeholder="Describe the space, amenities, neighborhood…" />
+            {errors.description && <span className="error-text">{errors.description}</span>}
+          </div>
+
+          <InputField label="Monthly Rent ($)" id="price" name="price" type="number"
+            min="0" value={form.price} onChange={handleChange} error={errors.price}
+            placeholder="e.g. 1500" />
+
+          <div className="form-row">
+            <InputField label="City" id="city" name="city" value={form.city}
+              onChange={handleChange} error={errors.city} placeholder="e.g. Paris" />
+            <InputField label="Country" id="country" name="country" value={form.country}
+              onChange={handleChange} error={errors.country} placeholder="e.g. France" />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="type">Property Type</label>
+            <select id="type" name="type" value={form.type} onChange={handleChange}
+              className={`form-input${errors.type ? ' input-error' : ''}`}>
+              {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+            {errors.type && <span className="error-text">{errors.type}</span>}
+          </div>
+
+          <InputField label="Photo URLs (comma-separated)" id="imageUrls" name="imageUrls"
+            value={form.imageUrls} onChange={handleChange}
+            placeholder="https://…, https://…" />
+
+          <div style={{ marginTop: '0.5rem' }}>
+            <button type="submit" className="btn-primary btn-block" disabled={loading}>
+              {loading ? 'Saving…' : isEdit ? 'Update Listing' : 'Publish Listing'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
