@@ -47,7 +47,7 @@ const createProperty = async (userId, data) => {
     err.statusCode = 400;
     throw err;
   }
-  if (typeof price !== 'number' || price < 0) {
+  if (isNaN(Number(price)) || Number(price) < 0) {
     const err = new Error('price must be a non-negative number');
     err.statusCode = 400;
     throw err;

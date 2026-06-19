@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { registerUser } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import InputField from '../components/InputField';
@@ -7,6 +7,8 @@ import InputField from '../components/InputField';
 export default function RegisterPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -37,7 +39,7 @@ export default function RegisterPage() {
     try {
       const res = await registerUser(form);
       login(res.data.token, res.data.user);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       setServerError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {

@@ -106,6 +106,10 @@ img { max-width: 100%; display: block; }
   border: 2px solid var(--border);
   flex-shrink: 0;
 }
+.navbar-avatar-img {
+  object-fit: cover;
+  background: var(--border);
+}
 
 .btn-link {
   background: none; border: none; cursor: pointer;
@@ -525,6 +529,10 @@ select.form-input { cursor: pointer; }
   background: var(--primary); color: #fff;
   font-size: 1.35rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
+}
+.profile-avatar-img {
+  object-fit: cover;
+  background: var(--border);
 }
 .profile-avatar-name { font-size: 0.95rem; font-weight: 700; text-align: center; }
 .profile-avatar-email { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 0.1rem; }

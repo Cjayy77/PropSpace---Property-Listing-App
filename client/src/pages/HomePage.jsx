@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getAllProperties } from '../api/properties';
 import PropertyCard from '../components/PropertyCard';
 import FilterSidebar from '../components/FilterSidebar';
@@ -7,6 +7,12 @@ export default function HomePage() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const cancelledRef = useRef(false);
+
+  useEffect(() => {
+    cancelledRef.current = false;
+    return () => { cancelledRef.current = true; };
+  }, []);
 
   const fetchProperties = async (filters = {}) => {
     setLoading(true);
@@ -18,11 +24,11 @@ export default function HomePage() {
       if (filters.maxPrice) params.maxPrice = filters.maxPrice;
       if (filters.sortBy) params.sortBy = filters.sortBy;
       const res = await getAllProperties(params);
-      setProperties(res.data.properties);
+      if (!cancelledRef.current) setProperties(res.data.properties);
     } catch {
-      setError('Failed to load properties. Please try again.');
+      if (!cancelledRef.current) setError('Failed to load properties. Please try again.');
     } finally {
-      setLoading(false);
+      if (!cancelledRef.current) setLoading(false);
     }
   };
 

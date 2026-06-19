@@ -103,13 +103,15 @@ export default function PropertyDetailPage() {
   const [favoriting, setFavoriting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     getPropertyById(id)
-      .then((res) => setProperty(res.data.property))
-      .catch(() => setError('This property could not be found.'))
-      .finally(() => setLoading(false));
+      .then((res) => { if (!cancelled) setProperty(res.data.property); })
+      .catch(() => { if (!cancelled) setError('This property could not be found.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [id]);
 
-  const isOwner = user && property && property.owner._id === user._id;
+  const isOwner = user && property && property.owner._id.toString() === user._id.toString();
   const isFavorited = ids.has(id);
 
   const handleDelete = async () => {

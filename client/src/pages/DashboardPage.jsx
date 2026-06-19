@@ -17,10 +17,12 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
     getMyProperties()
-      .then((res) => setProperties(res.data.properties))
-      .catch(() => setError('Failed to load your listings.'))
-      .finally(() => setLoading(false));
+      .then((res) => { if (!cancelled) setProperties(res.data.properties); })
+      .catch(() => { if (!cancelled) setError('Failed to load your listings.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const handleDelete = async (id) => {

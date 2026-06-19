@@ -13,10 +13,12 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
+    let cancelled = false;
     getMe()
-      .then((res) => setUser(res.data.user))
-      .catch(() => localStorage.removeItem('token'))
-      .finally(() => setLoading(false));
+      .then((res) => { if (!cancelled) setUser(res.data.user); })
+      .catch(() => { if (!cancelled) localStorage.removeItem('token'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, []);
 
   const login = (token, userData) => {

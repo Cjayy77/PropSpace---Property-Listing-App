@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '', phone: user?.phone || '', avatarUrl: user?.avatarUrl || '',
   });
+  const [profileErrors, setProfileErrors] = useState({});
   const [profileMsg, setProfileMsg] = useState('');
   const [profileError, setProfileError] = useState('');
   const [profileLoading, setProfileLoading] = useState(false);
@@ -23,11 +24,22 @@ export default function ProfilePage() {
   const [pwError, setPwError] = useState('');
   const [pwLoading, setPwLoading] = useState(false);
 
+  const validateProfile = () => {
+    const e = {};
+    if (profileForm.name && !profileForm.name.trim()) e.name = 'Name cannot be blank';
+    if (profileForm.avatarUrl && !/^https?:\/\/.+/.test(profileForm.avatarUrl.trim()))
+      e.avatarUrl = 'Must be a valid URL (http:// or https://)';
+    return e;
+  };
+
   const handleProfileChange = (e) =>
     setProfileForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+    const e2 = validateProfile();
+    if (Object.keys(e2).length) { setProfileErrors(e2); return; }
+    setProfileErrors({});
     setProfileMsg(''); setProfileError(''); setProfileLoading(true);
     try {
       const res = await updateMe(profileForm);
@@ -79,7 +91,10 @@ export default function ProfilePage() {
           <aside>
             <div className="profile-section">
               <div className="profile-avatar-block">
-                <div className="profile-avatar-lg">{initials}</div>
+                {user?.avatarUrl
+                  ? <img src={user.avatarUrl} alt={user.name || user.username} className="profile-avatar-lg profile-avatar-img" />
+                  : <div className="profile-avatar-lg">{initials}</div>
+                }
                 <div>
                   <div className="profile-avatar-name">{user?.name || user?.username}</div>
                   <div className="profile-avatar-email">{user?.email}</div>
@@ -110,13 +125,14 @@ export default function ProfilePage() {
               {profileError && <p className="error-banner" role="alert">{profileError}</p>}
               <form onSubmit={handleProfileSubmit} noValidate>
                 <InputField label="Display Name" id="name" name="name" value={profileForm.name}
-                  onChange={handleProfileChange} placeholder="Your full name" />
+                  onChange={handleProfileChange} placeholder="Your full name"
+                  error={profileErrors.name} />
                 <InputField label="Phone" id="phone" name="phone" type="tel"
                   value={profileForm.phone} onChange={handleProfileChange}
                   placeholder="+1 555 000 0000" />
                 <InputField label="Avatar URL" id="avatarUrl" name="avatarUrl"
                   value={profileForm.avatarUrl} onChange={handleProfileChange}
-                  placeholder="https://…" />
+                  placeholder="https://…" error={profileErrors.avatarUrl} />
                 <button type="submit" className="btn-primary" disabled={profileLoading}
                   style={{ marginTop: '0.25rem' }}>
                   {profileLoading ? 'Saving…' : 'Save Changes'}

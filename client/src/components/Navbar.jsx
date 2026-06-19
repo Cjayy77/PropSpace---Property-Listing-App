@@ -25,7 +25,10 @@ export default function Navbar() {
             <Link to="/dashboard">My Listings</Link>
             <Link to="/properties/new">List Property</Link>
             <Link to="/profile" title={user.username} aria-label="Profile">
-              <div className="navbar-avatar">{initials}</div>
+              {user.avatarUrl
+                ? <img src={user.avatarUrl} alt={user.name || user.username} className="navbar-avatar navbar-avatar-img" />
+                : <div className="navbar-avatar">{initials}</div>
+              }
             </Link>
             <button onClick={handleLogout} className="btn-link">Logout</button>
           </>
